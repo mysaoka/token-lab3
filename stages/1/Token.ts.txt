@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { network } from "hardhat";
+import { zeroAddress, maxUint256 } from "viem";
+describe("Token", async function () {
+  const { viem } = await network.create();
+  const client = await viem.getPublicClient();
+  const [creator, other, third] = await viem.getWalletClients();
+  const supply = 10000n * 10n ** 18n;
+  const deploy = () => viem.deployContract("Token", ["HelloToken", "HELLO", supply]);
+  it("Initial version: supply exists but creator balance is zero", async () => {
+    const token = await deploy();
+    assert.equal(await token.read.totalSupply(), supply);
+    assert.equal(await token.read.balanceOf([creator.account.address]), 0n);
+    await viem.assertions.revertWith(token.write.transfer([other.account.address, 1n]), "ERC20: transfer amount exceeds balance");
+  });
+});

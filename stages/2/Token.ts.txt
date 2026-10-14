@@ -1,0 +1,21 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { network } from "hardhat";
+import { zeroAddress, maxUint256 } from "viem";
+describe("Token", async function () {
+  const { viem } = await network.create();
+  const client = await viem.getPublicClient();
+  const [creator, other, third] = await viem.getWalletClients();
+  const supply = 10000n * 10n ** 18n;
+  const deploy = () => viem.deployContract("Token", ["HelloToken", "HELLO", supply]);
+  it("Constructor assigns supply and emits Transfer from zero", async () => {
+    const token = await deploy();
+    assert.equal(await token.read.balanceOf([creator.account.address]), supply);
+    assert.equal(await token.read.totalSupply(), supply);
+    const events = await client.getContractEvents({address:token.address, abi:token.abi, eventName:"Transfer", fromBlock:await client.getBlockNumber(), strict:true});
+    assert.equal(events.length, 1);
+    assert.equal(events[0].args.from, zeroAddress);
+    assert.equal(events[0].args.to.toLowerCase(), creator.account.address.toLowerCase());
+    assert.equal(events[0].args.value, supply);
+  });
+});

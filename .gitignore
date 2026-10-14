@@ -1,0 +1,16 @@
+node_modules/
+.next/
+Temp/
+Screenshots/
+Report/
+.env*
+artifacts/
+cache/
+**/ignition/deployments/
+*.tsbuildinfo
+*keystore*
+.agents/
+.claude/
+AGENTS.md
+CLAUDE.md
+*.log
